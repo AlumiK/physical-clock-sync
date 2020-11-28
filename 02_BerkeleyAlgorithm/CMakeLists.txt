@@ -8,4 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_COMPILER mpicxx)
 set(CMAKE_C_COMPILER mpicc)
 
-add_executable(02_BerkeleyAlgorithm main.cpp)
+add_executable(${PROJECT_NAME} main.cpp)
+
+find_package(OpenMP REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)

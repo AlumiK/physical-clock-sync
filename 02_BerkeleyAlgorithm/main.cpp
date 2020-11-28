@@ -1,80 +1,74 @@
 #include <iostream>
 #include <iomanip>
-#include <random>
-#include <unistd.h>
+#include <chrono>
 
 #include "mpi.h"
 
+uint64_t now() {
+    return duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
 void masterRoutine() {
-    MPI_Wtime();
     int size, rank = 0;
-    MPI_Status status;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    std::cout << std::fixed << std::setprecision(6);
 
-    double starts[size];
-    double t[size];
+    uint64_t t[size];
+
+#pragma omp parallel for
     for (auto i = 1; i < size; ++i) {
+        MPI_Status status;
         std::cout << "[MASTER] Sending request to slave " << i << std::endl;
-        starts[i] = MPI_Wtime();
+        uint64_t slaveT;
+        const auto start = now();
         MPI_Send(&rank, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+        MPI_Recv(&slaveT, 1, MPI_UINT64_T, i, 0, MPI_COMM_WORLD, &status);
+        const auto T_round = now() - start;
+        t[i] = slaveT + T_round / 2;
+        std::cout << "[MASTER] Received a response from slave" << i << ", T_round is " << T_round << std::endl;
     }
-    for (auto i = 1; i < size; ++i) {
-        double slaveT;
-        MPI_Recv(&slaveT, 1, MPI_DOUBLE, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status);
-        const auto slaveRank = status.MPI_SOURCE;
-        const auto tRound = MPI_Wtime() - starts[slaveRank];
-        t[slaveRank] = slaveT + tRound / 2;
-        std::cout << "[MASTER] Received a response {'time': " << slaveT << "} from slave"
-                  << status.MPI_SOURCE << std::endl;
-    }
-    t[rank] = MPI_Wtime();
+    t[rank] = now();
 
-    auto avgT = 0.0;
+    uint64_t avgT = 0;
     for (const auto i : t) {
         avgT += i;
     }
     avgT /= size;
     for (auto i = 1; i < size; ++i) {
         const auto offset = avgT - t[i];
-        MPI_Send(&offset, 1, MPI_DOUBLE, i, 1, MPI_COMM_WORLD);
+        MPI_Send(&offset, 1, MPI_UINT64_T, i, 1, MPI_COMM_WORLD);
     }
     const auto offset = avgT - t[rank];
 
     MPI_Barrier(MPI_COMM_WORLD);
-    const auto localT = MPI_Wtime() + offset;
-    std::cout << "[MASTER] Current time is \033[1;33m" << localT << "\033[0m" << std::endl;
+    const auto localT = now() + offset;
+    std::cout << "[MASTER] Current timestamp(ms) is \033[1;33m" << localT << "\033[0m" << std::endl;
 }
 
 void slaveRoutine() {
-    MPI_Wtime();
     int rank, buf;
     MPI_Status status;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    std::random_device r;
-    std::default_random_engine rng(r());
-    std::uniform_int_distribution<int> uniform_dist(50000, 100000);
-    std::cout << std::fixed << std::setprecision(6);
-
     MPI_Recv(&buf, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-    usleep(uniform_dist(rng));
-    auto t = MPI_Wtime();
+    const auto t = now();
     std::cout << "[SLAVE " << rank << "] Received a request from master at " << t << std::endl;
-    usleep(uniform_dist(rng));
-    MPI_Send(&t, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+    MPI_Send(&t, 1, MPI_UINT64_T, 0, 0, MPI_COMM_WORLD);
 
-    double offset;
-    MPI_Recv(&offset, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD, &status);
+    uint64_t offset;
+    MPI_Recv(&offset, 1, MPI_UINT64_T, 0, 1, MPI_COMM_WORLD, &status);
 
     MPI_Barrier(MPI_COMM_WORLD);
-    const auto localT = MPI_Wtime() + offset;
-    std::cout << "[SLAVE " << rank << "] Current time is \033[1;33m" << localT << "\033[0m" << std::endl;
+    const auto localT = now() + offset;
+    std::cout << "[SLAVE " << rank << "] Current timestamp(ms) is \033[1;33m" << localT << "\033[0m" << std::endl;
 }
 
 int main(int argc, char **argv) {
-    int rank;
-    MPI_Init(&argc, &argv);
+    int rank, provided;
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+    if (provided != MPI_THREAD_MULTIPLE) {
+        std::cout << "Multithreading is not supported!" << std::endl;
+        exit(-1);
+    }
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     if (rank == 0) {
