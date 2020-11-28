@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 project(03_NTP)
 
 find_package(MPI REQUIRED)
@@ -8,4 +8,4 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_COMPILER mpicxx)
 set(CMAKE_C_COMPILER mpicc)
 
-add_executable(03_NTP main.cpp)
+add_executable(${PROJECT_NAME} main.cpp)
