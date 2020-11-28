@@ -3,8 +3,7 @@
 #include <iomanip>
 #include <chrono>
 #include <unistd.h>
-
-#include "mpi.h"
+#include <mpi.h>
 
 const auto N_TRIES = 3;
 

@@ -1,8 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <chrono>
-
-#include "mpi.h"
+#include <mpi.h>
 
 uint64_t now() {
     return duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
