@@ -8,7 +8,7 @@
 const auto N_TRIES = 3;
 
 uint64_t now() {
-    return duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    return duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 void serverRoutine() {
@@ -29,7 +29,7 @@ void serverRoutine() {
 
     MPI_Barrier(MPI_COMM_WORLD);
     const auto localT = now();
-    std::cout << "[SERVER] Current timestamp(ms) is \033[1;33m" << localT << "\033[0m" << std::endl;
+    std::cout << "[SERVER] Current timestamp(us) is \033[1;33m" << localT << "\033[0m" << std::endl;
 }
 
 void clientRoutine() {
@@ -56,13 +56,13 @@ void clientRoutine() {
             const auto localT = t + tRound / 2;
             offset = localT - now();
             std::cout << "[CLIENT " << rank << "] New minimum T_round found: \033[1;31m" << tRound
-                      << "\033[0m, set timestamp(ms) to \033[1;31m" << localT << "\033[0m" << std::endl;
+                      << "\033[0m, set timestamp(us) to \033[1;31m" << localT << "\033[0m" << std::endl;
         }
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
     const auto localT = now() + offset;
-    std::cout << "[CLIENT " << rank << "] Current timestamp(ms) is \033[1;33m" << localT << "\033[0m" << std::endl;
+    std::cout << "[CLIENT " << rank << "] Current timestamp(us) is \033[1;33m" << localT << "\033[0m" << std::endl;
 }
 
 int main(int argc, char **argv) {

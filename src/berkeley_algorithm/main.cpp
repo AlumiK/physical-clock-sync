@@ -4,7 +4,7 @@
 #include <mpi.h>
 
 uint64_t now() {
-    return duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    return duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 void masterRoutine() {
@@ -40,7 +40,7 @@ void masterRoutine() {
 
     MPI_Barrier(MPI_COMM_WORLD);
     const auto localT = now() + offset;
-    std::cout << "[MASTER] Current timestamp(ms) is \033[1;33m" << localT << "\033[0m" << std::endl;
+    std::cout << "[MASTER] Current timestamp(us) is \033[1;33m" << localT << "\033[0m" << std::endl;
 }
 
 void slaveRoutine() {
@@ -58,7 +58,7 @@ void slaveRoutine() {
 
     MPI_Barrier(MPI_COMM_WORLD);
     const auto localT = now() + offset;
-    std::cout << "[SLAVE " << rank << "] Current timestamp(ms) is \033[1;33m" << localT << "\033[0m" << std::endl;
+    std::cout << "[SLAVE " << rank << "] Current timestamp(us) is \033[1;33m" << localT << "\033[0m" << std::endl;
 }
 
 int main(int argc, char **argv) {
