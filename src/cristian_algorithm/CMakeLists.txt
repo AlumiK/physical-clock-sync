@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(01_Cristian)
+project(cristian_algorithm)
 
 find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})

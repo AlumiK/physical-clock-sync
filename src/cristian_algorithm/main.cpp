@@ -48,7 +48,7 @@ void clientRoutine() {
         MPI_Recv(&t, 1, MPI_UINT64_T, 0, i, MPI_COMM_WORLD, &status);
         const auto tRound = now() - start;
 
-        std::cout << "[CLIENT " << rank << "] Received a response for request " << status.MPI_TAG << " from server"
+        std::cout << "[CLIENT " << rank << "] Received response " << status.MPI_TAG << " from server"
                   << std::endl;
 
         if (tRound < minTRound) {
@@ -56,7 +56,7 @@ void clientRoutine() {
             const auto localT = t + tRound / 2;
             offset = localT - now();
             std::cout << "[CLIENT " << rank << "] New minimum T_round found: \033[1;31m" << tRound
-                      << "\033[0m, updated local timestamp(ms) to \033[1;31m" << localT << "\033[0m" << std::endl;
+                      << "\033[0m, set timestamp(ms) to \033[1;31m" << localT << "\033[0m" << std::endl;
         }
     }
 

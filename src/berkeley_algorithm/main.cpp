@@ -16,7 +16,7 @@ void masterRoutine() {
 #pragma omp parallel for
     for (auto i = 1; i < size; ++i) {
         MPI_Status status;
-        std::cout << "[MASTER] Sending request to slave " << i << std::endl;
+        std::cout << "[MASTER] Sending a request to slave " << i << std::endl;
         uint64_t slaveT;
         const auto start = now();
         MPI_Send(&rank, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
