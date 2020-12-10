@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if (provided != MPI_THREAD_MULTIPLE) {
         std::cout << "Multithreading is not supported!" << std::endl;
-        exit(-1);
+        return EXIT_FAILURE;
     }
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -77,5 +77,5 @@ int main(int argc, char **argv) {
     }
 
     MPI_Finalize();
-    return 0;
+    return EXIT_SUCCESS;
 }

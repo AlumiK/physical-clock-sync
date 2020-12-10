@@ -63,5 +63,5 @@ int main(int argc, char **argv) {
     std::cout << "[SERVER " << rank << "] Current timestamp(us) is \033[1;33m" << localT << "\033[0m" << std::endl;
 
     MPI_Finalize();
-    return 0;
+    return EXIT_SUCCESS;
 }
